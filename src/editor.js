@@ -594,6 +594,9 @@ function createHTML(options = {}) {
                 } else {
                     saveSelection();
                 }
+                if (ele.nodeName === 'A' && ele.getAttribute('href')) {
+                    postAction({type: 'LINK_TOUCHED', data: ele.getAttribute('href')});
+                }
             }
             addEventListener(content, 'touchcancel', handleSelecting);
             addEventListener(content, 'mouseup', handleSelecting);

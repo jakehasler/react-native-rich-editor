@@ -148,7 +148,7 @@ export default class RichTextEditor extends Component {
 
     onMessage(event) {
         const that = this;
-        const {onFocus, onBlur, onChange, onPaste, onKeyUp, onKeyDown, onInput, onMessage, onCursorPosition} = that.props;
+        const {onFocus, onLink, onBlur, onChange, onPaste, onKeyUp, onKeyDown, onInput, onMessage, onCursorPosition} = that.props;
         try {
             const message = JSON.parse(event.nativeEvent.data);
             const data = message.data;
@@ -196,6 +196,9 @@ export default class RichTextEditor extends Component {
                     break;
                 case messages.ON_INPUT:
                     onInput?.(data);
+                    break;
+                case messages.LINK_TOUCHED:
+                    onLink?.(data);
                     break;
                 case messages.OFFSET_HEIGHT:
                     that.setWebHeight(data);
@@ -278,6 +281,13 @@ export default class RichTextEditor extends Component {
                     javaScriptEnabled={true}
                     source={viewHTML}
                     onLoad={that.init}
+                    onNavigationStateChange={(event) => {
+                        if (event.navigationType === 'click' && event.url) {
+                            Linking.openURL(event.url);
+                            return false;
+                        }
+                        return true;
+                    }}
                 />
                 {Platform.OS === 'android' && <TextInput ref={ref => (that._input = ref)} style={styles._input} />}
             </>
