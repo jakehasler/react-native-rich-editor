@@ -281,13 +281,13 @@ export default class RichTextEditor extends Component {
                     javaScriptEnabled={true}
                     source={viewHTML}
                     onLoad={that.init}
-                    onNavigationStateChange={(event) => {
-                        if (event.navigationType === 'click' && event.url) {
-                            this.webviewBridge?.stopLoading();
-                            Linking.openURL(event.url);
-                            return false;
-                        }
-                        return true;
+                    onShouldStartLoadWithRequest={event => {
+                      if (event.url !== 'about:blank') {
+                        this.webviewBridge?.stopLoading();
+                        Linking?.openURL(event.url);
+                        return false;
+                      }
+                      return true;
                     }}
                 />
                 {Platform.OS === 'android' && <TextInput ref={ref => (that._input = ref)} style={styles._input} />}
