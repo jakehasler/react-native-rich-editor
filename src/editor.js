@@ -675,7 +675,7 @@ function createHTML(options = {}) {
                     if ( action[msgData.name]){
                         var flag = msgData.name === 'result';
                         // insert image or link need current focus
-                        flag && focusCurrent();
+                        // flag && focusCurrent();
                         action[msgData.name](msgData.data, msgData.options);
                         flag && handleState();
                     } else {
