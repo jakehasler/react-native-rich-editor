@@ -485,9 +485,10 @@ const styles = StyleSheet.create({
         zIndex: -999,
         bottom: -999,
         left: -999,
+        backgroundColor: '#ffffff',
     },
 
     webview: {
-        backgroundColor: "transparent"
+        backgroundColor: '#ffffff',
     }
 });
