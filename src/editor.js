@@ -2,8 +2,6 @@ function getContentCSS() {
     /*img {max-width: 98%;margin-left:auto;margin-right:auto;display: block;}*/
     return `
     <style>
-        ul { padding-left:30px }
-        ol { padding-left:30px }
         video {max-width: 98%;margin-left:auto;margin-right:auto;display: block;}
         img {max-width: 98%;vertical-align: middle;}
         table {width: 100% !important;}
@@ -153,20 +151,20 @@ function createHTML(options = {}) {
         }
 
         function execCheckboxList (node, html){
-            // var html = createCheckbox(node ? node.innerHTML: '');
-            var html = createCheckbox(‘’);
+            var html = createCheckbox(node ? node.innerHTML: '');
+            // var html = createCheckbox(‘’);
 
             var HTML = "<ol class='x-todo'><li>"+ html +"</li></ol>"
             var foNode;
 
-            // if (node){
-            //     node.innerHTML = HTML;
-            //     foNode = node.firstChild;
-            // } else {
-            //     exec("insertHTML", HTML);
-            // }
+            if (node){
+                node.innerHTML = HTML;
+                foNode = node.firstChild;
+            } else {
+                exec("insertHTML", HTML);
+            }
 
-            exec(“insertHTML”, HTML);
+            // exec(“insertHTML”, HTML);
 
             foNode && setTimeout(function (){
                 setCollapse(foNode);
