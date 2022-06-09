@@ -9,7 +9,10 @@ function getContentCSS() {
         table span { font-size: 12px !important; }
         .x-todo li {list-style:none;}
         .x-todo-box {position: relative; left: -24px;}
-        .x-todo-box input{position: absolute;}
+        .x-todo-box input{position: absolute; z-index:10; height: 20px; width: 20px; opacity:0;}
+        .x-todo-box input:checked ~ .checkmark{background: #D77862; border-color: transparent}
+        .checkmark {position: absolute; height: 19px; width: 19px; border: 1px solid #ccc; border-radius: 100%; top:2px; left:1px;}
+        .checkmark svg {position:absolute; top:-8px; left:-7px;}
         blockquote{border-left: 6px solid #ddd;padding: 5px 0 5px 10px;margin: 15px 0 15px 15px;}
         hr{display: block;height: 0; border: 0;border-top: 1px solid #ccc; margin: 15px 0; padding: 0;}
         pre{padding: 10px 5px 10px 10px;margin: 15px 0;display: block;line-height: 18px;background: #F0F0F0;border-radius: 6px;font-size: 13px; font-family: 'monaco', 'Consolas', "Liberation Mono", Courier, monospace; word-break: break-all; word-wrap: break-word;overflow-x: auto;}
@@ -151,20 +154,21 @@ function createHTML(options = {}) {
         }
 
         function execCheckboxList (node, html){
-            var html = createCheckbox(node ? node.innerHTML: '');
-            // var html = createCheckbox(‘’);
+            // var html = createCheckbox(node ? node.innerHTML: '');
+            var html = createCheckbox('');
 
             var HTML = "<ol class='x-todo'><li>"+ html +"</li></ol>"
+
             var foNode;
 
-            if (node){
-                node.innerHTML = HTML;
-                foNode = node.firstChild;
-            } else {
-                exec("insertHTML", HTML);
-            }
+            // if (node) {
+            //     node.innerHTML = HTML;
+            //     foNode = node.firstChild;
+            // } else {
+            //     exec("insertHTML", HTML);
+            // }
 
-            // exec(“insertHTML”, HTML);
+            exec('insertHTML', HTML);
 
             foNode && setTimeout(function (){
                 setCollapse(foNode);
@@ -179,7 +183,9 @@ function createHTML(options = {}) {
         }
 
         function createCheckbox(end){
-            var html = '<span contenteditable="false" class="x-todo-box"><input type="checkbox"></span>';
+            var html = '<span contenteditable="false" class="x-todo-box"><input type="checkbox"><span class="checkmark"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 13L13.8571 20L11 17.2037" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>';
+
+
             if (end && typeof end !== 'boolean'){
                 html += end;
             } else if(end !== false){
@@ -437,7 +443,8 @@ function createHTML(options = {}) {
                     if (!!box){
                         cancelCheckboxList(box.parentNode);
                     } else {
-                        !queryCommandState('insertOrderedList') && execCheckboxList(pNode);
+
+                         !queryCommandState('insertOrderedList') && execCheckboxList(pNode);
                     }
                 }
             },
