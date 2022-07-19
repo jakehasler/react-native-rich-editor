@@ -91,7 +91,6 @@ export default class RichTextEditor extends Component {
                         defaultParagraphSeparator,
                         firstFocusEnd,
                         useContainer,
-                        onIos: PlatformIOS
                     }),
             },
             keyboardHeight: 0,

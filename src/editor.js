@@ -7,10 +7,10 @@ function getContentCSS() {
         table {width: 100% !important;}
         table td {width: inherit;}
         table span { font-size: 12px !important; }
-        .x-todo li {list-style:none; margin-bottom:15px; margin-top: 10px; padding-left:10px;}
-        .checked-li {color: #ccc; }
-        .x-todo-box {position: relative; left: -28px; user-select: none;}
-        .x-todo-box input {position: absolute; z-index:10; height: 22px; width: 22px; opacity:0; top: -2px; left: -3px; padding:5px;}
+        .x-todo li {list-style:none; margin-bottom:15px; margin-top: 10px;}
+        .checked-li {color: #ccc;}
+        .x-todo-box {position: relative; left: -24px; user-select: none;}
+        .x-todo-box input {position: absolute; z-index:10; height: 22px; width: 22px; opacity:0; top: -2px; left: -3px;padding:5px,}
         .x-todo-box input:checked ~ .checkmark{background: #D77862; border-color: transparent}
         .checkmark {position: absolute; height: 21px; width: 21px; border: 1px solid #ccc; border-radius: 100%; top:0px; left:-1px;}
         .checkmark svg {position:absolute; top:-7px; left:-7px;}
@@ -43,7 +43,6 @@ function createHTML(options = {}) {
         // When first gaining focus, the cursor moves to the end of the text
         firstFocusEnd = true,
         useContainer = true,
-        onIos = true
     } = options;
     //ERROR: HTML height not 100%;
     return `
@@ -175,7 +174,7 @@ function createHTML(options = {}) {
             var li = getNodeByName(focusNode, 'LI')
 
             //add contenteditable=false to avoid selecting the content when we click on the checkmark
-            // li.firstChild.setAttribute("contenteditable", "false");
+            li.firstChild.setAttribute("contenteditable", "false");
             
 
             foNode && setTimeout(function (){
@@ -186,13 +185,12 @@ function createHTML(options = {}) {
         var _checkboxFlag = 0; // 1 = add checkbox; 2 = cancel checkbox
         function cancelCheckboxList(box){
             _checkboxFlag = 2;
-            anchorNode.firstChild.remove();
             exec("insertOrderedList");
             setCollapse(box);
         }
 
         function createCheckbox(end){
-            var html = '<div class="x-todo-box"><input type="checkbox"><span class="checkmark"><svg width="25" height="25" viewBox="0 0 25 25" fill="none"><path d="M21 13L13.8571 20L11 17.2037" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>';
+            var html = '<span contenteditable="false" class="x-todo-box"><input type="checkbox"><span class="checkmark"><svg width="25" height="25" viewBox="0 0 25 25" fill="none"><path d="M21 13L13.8571 20L11 17.2037" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>';
 
             if (end && typeof end !== 'boolean'){
                 html += end;
@@ -279,20 +277,22 @@ function createHTML(options = {}) {
 
         var _keyDown = false;
         function handleChange (event){
-            console.log('handleChange')
             var node = anchorNode;
             Actions.UPDATE_HEIGHT();
 
+            var ele = event.target;
+            if (!(ele.nodeName === 'INPUT' && ele.type === 'checkbox')){
+                Actions.UPDATE_OFFSET_Y();
+            }
+
             if (_keyDown){
                 if(_checkboxFlag === 1 && checkboxNode(node)){
-                    console.log('_checkboxFlag 1')
                     _checkboxFlag = 0;
                     var sib = node.previousSibling;
                     if (!sib || sib.childNodes.length > 1){
                         insertCheckbox(node);
                     }
                 } else if(_checkboxFlag === 2){
-                    console.log('_checkboxFlag 2')
                     _checkboxFlag = 0;
                     var sp = createElement(editor.paragraphSeparator);
                     var br = createElement('br');
@@ -301,7 +301,6 @@ function createHTML(options = {}) {
                         if (!node.classList.contains("x-todo-box")){
                             node = node.parentNode.previousSibling;
                         }
-                        node.nodeName
                         node.parentNode.replaceChild(sp, node);
                         setCollapse(sp);
                     });
@@ -501,19 +500,6 @@ function createHTML(options = {}) {
             },
 
             init: function (){
-                //Checklist
-                //we need the content editable on false (ios) in order to not select the check when click it.
-                const checks = document.getElementsByClassName("x-todo-box")
-                if(checks && checks.length > 0){
-                    for(const check of checks){
-                        if(${onIos}){
-                            check.setAttribute("contenteditable", "false")
-                        } else {
-                            check.removeAttribute("contenteditable")
-                        }
-                    }
-                }
-
                 if (${useContainer}){
                     // setInterval(Actions.UPDATE_HEIGHT, 150);
                     Actions.UPDATE_HEIGHT();
@@ -547,7 +533,7 @@ function createHTML(options = {}) {
         };
 
         var init = function init(settings) {
-           
+
             var paragraphSeparator = settings[defaultParagraphSeparatorString];
             var content = settings.element.content = createElement('div');
             content.id = 'content';
@@ -559,19 +545,13 @@ function createHTML(options = {}) {
             content.autocomplete = 'off';
             content.className = "pell-content";
             content.oninput = function (_ref) {
-                
                 // var firstChild = _ref.target.firstChild;
                 if ((anchorNode === void 0 || anchorNode === content) && queryCommandValue(formatBlock) === ''){
                     if ( !compositionStatus ){
                         formatParagraph(true);
                         paragraphStatus = 0;
                     } else {
-                        if(${onIos}){
-                            paragraphStatus = 1;
-                        } else {
-                            paragraphStatus = 0;
-                        }
-                        
+                        paragraphStatus = 1;
                     }
                 } else if (content.innerHTML === '<br>'){
                      content.innerHTML = '';
@@ -616,68 +596,39 @@ function createHTML(options = {}) {
             }
 
             function handleSelecting(event){
-                console.log('handleSelecting')
-                const ele = event.target;
-                const isCheckBoxInput = ele.nodeName === 'INPUT' && ele.type === 'checkbox'
-
-                //prevent the selection when we click on a checklist item(required for ios)
-                if (isCheckBoxInput){
-                    if(${onIos}){
-                        ele.parentNode.setAttribute("contenteditable", "false")
-                    } else {
-                        ele.parentNode.removeAttribute("contenteditable")
-                    }
-                    event.preventDefault()
-                }
-
                 event.stopPropagation();
                 handleState();
-                
-                //fires a new click event to continue with the next actions
-                if (isCheckBoxInput){
-                    ele.click()
-                }
             }
 
             function postKeyAction(event, type){
                 postAction({type: type, data: {keyCode: event.keyCode, key: event.key}});
             }
-
             function handleKeyup(event){
-                console.log('handleKeyup')
                 enterStatus = 0;
                 _keyDown = false;
                 if (event.keyCode === 8) handleSelecting (event);
                 ${keyUpListener} && postKeyAction(event, "CONTENT_KEYUP")
             }
-
             function handleKeydown(event){
-                console.log('handleKeydown')
-                const ele = event.target;
                 _keyDown = true;
                  handleState();
                 if (event.key === 'Enter'){
                     enterStatus = 1; // set enter true
                     var box;
                     var block = queryCommandValue(formatBlock);
-                 
-                    if (queryCommandState('insertOrderedList') && !!(box = checkboxNode(anchorNode))){
+                    if (anchorNode.innerHTML === '<br>' && anchorNode.parentNode !== editor.content){
+                        // setCollapse(editor.content);
+                    } else if (queryCommandState('insertOrderedList') && !!(box = checkboxNode(anchorNode))){
                         var node = anchorNode && anchorNode.childNodes[1];
                         if (node && node.nodeName === 'BR'){
-                             cancelCheckboxList(box.parentNode);
-                             event.preventDefault();
+                            cancelCheckboxList(box.parentNode);
+                            event.preventDefault();
                         } else{
                             // add checkbox
                             _checkboxFlag = 1;
-                            //adjust height
-                            if (!(ele.nodeName === 'INPUT' && ele.type === 'checkbox')){
-                                Actions.UPDATE_OFFSET_Y();
-                            }
                         }
                     }
-
                     if (block === 'pre' && anchorNode.innerHTML === '<br>'){
-                        console.log('block')
                         // code end enter new line (Unfinished)
                         if (!anchorNode.nextSibling){
                             event.preventDefault();
@@ -689,41 +640,10 @@ function createHTML(options = {}) {
                             });
                         }
                     }
-                } else if(event.key === 'Backspace'){
-                    console.log('Backspace')
-                    const node = anchorNode && anchorNode.childNodes[1];
-                    const nodeFirstChild = anchorNode && anchorNode.childNodes[0];
-                    const prevE = anchorNode.previousSibling
-                    const parent = anchorNode.parentNode
-                    if(!!(checkboxNode(anchorNode))){
-                        //remove chebox list style
-                        if(node.nodeName === 'BR' && parent.childNodes.length == 1){
-                            cancelCheckboxList(parent.parentNode);
-                            event.preventDefault();
-                            return
-                        }
-
-                        if (node && node.nodeName === 'BR'){
-                            if(prevE.nodeName === 'LI'){
-                                event.preventDefault()
-                                anchorNode.remove();
-                                setCollapse(prevE)
-                                settings.onChange();
-                            }
-                               
-                        }
-               
-                    } else if(queryCommandState('insertOrderedList')) {
-                        if (nodeFirstChild.nodeName === 'BR' && parent.childNodes.length == 1){
-                            parent.remove();
-                            setCollapse(parent.parentNode)
-                        }
-                    }
-                  
                 }
                 ${keyDownListener} && postKeyAction(event, "CONTENT_KEYDOWN");
             }
-            function handleFocus (e){
+            function handleFocus (){
                 editorFoucs = true;
                 setTimeout(function (){
                     Actions.UPDATE_OFFSET_Y();
@@ -758,12 +678,10 @@ function createHTML(options = {}) {
                 }
             }
 
-            function handleClick(event){
-                console.log('handleClick')
-                var ele = event.target;
-                const isCheckBoxInput = ele.nodeName === 'INPUT' && ele.type === 'checkbox'
                 
-                if (isCheckBoxInput){
+            function handleClick(event){
+                var ele = event.target;
+                if (ele.nodeName === 'INPUT' && ele.type === 'checkbox'){
                     // Set whether the checkbox is selected by default
                     if (ele.checked) ele.setAttribute('checked', '');
                     else ele.removeAttribute('checked');
@@ -775,9 +693,8 @@ function createHTML(options = {}) {
                     postAction({type: 'LINK_TOUCHED', data: ele.getAttribute('href')});
                 }
             }
-
             addEventListener(content, 'touchcancel', handleSelecting);
-            // addEventListener(content, 'mouseup', handleSelecting);
+            addEventListener(content, 'mouseup', handleSelecting);
             addEventListener(content, 'touchend', handleSelecting);
             addEventListener(content, 'keyup', handleKeyup);
             addEventListener(content, 'click', handleClick);
@@ -820,11 +737,11 @@ function createHTML(options = {}) {
             };
             document.addEventListener("message", message , false);
             window.addEventListener("message", message , false);
-            // document.addEventListener('mouseup', function (event) {
-            //     event.preventDefault();
-            //     Actions.content.focus();
-            //     handleSelecting(event);
-            // });
+            document.addEventListener('mouseup', function (event) {
+                event.preventDefault();
+                Actions.content.focus();
+                handleSelecting(event);
+            });
             return {content, paragraphSeparator: paragraphSeparator, settings};
         };
 
