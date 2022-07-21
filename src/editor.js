@@ -1,13 +1,13 @@
 function getContentCSS() {
-    /*img {max-width: 98%;margin-left:auto;margin-right:auto;display: block;}*/
-    return `
+  /*img {max-width: 98%;margin-left:auto;margin-right:auto;display: block;}*/
+  return `
     <style>
         video {max-width: 98%;margin-left:auto;margin-right:auto;display: block;}
         img {max-width: 98%;vertical-align: middle;}
         table {width: 100% !important;}
         table td {width: inherit;}
         table span { font-size: 12px !important; }
-        .x-todo li {list-style:none; margin-bottom:15px; margin-top: 10px; padding-left:10px;}
+        .x-todo li {list-style:none; margin-bottom:12px; margin-top: 10px; padding-left:10px;}
         .checked-li {color: #ccc; }
         .x-todo-box {position: relative; left: -28px; user-select: none;}
         .x-todo-box input {position: absolute; z-index:10; height: 22px; width: 22px; opacity:0; top: -2px; left: -3px; padding:5px;}
@@ -23,30 +23,30 @@ function getContentCSS() {
 }
 
 function createHTML(options = {}) {
-    const {
-        backgroundColor = '#FFF',
-        color = '#000033',
-        caretColor = '',
-        placeholderColor = '#a9a9a9',
-        contentCSSText = '',
-        cssText = '',
-        initialCSSText = '',
-        pasteAsPlainText = false,
-        pasteListener = false,
-        keyDownListener = false,
-        keyUpListener = false,
-        inputListener = false,
-        autoCapitalize = 'off',
-        enterKeyHint = '',
-        autoCorrect = false,
-        defaultParagraphSeparator = 'div',
-        // When first gaining focus, the cursor moves to the end of the text
-        firstFocusEnd = true,
-        useContainer = true,
-        onIos = true
-    } = options;
-    //ERROR: HTML height not 100%;
-    return `
+  const {
+    backgroundColor = '#FFF',
+    color = '#000033',
+    caretColor = '',
+    placeholderColor = '#a9a9a9',
+    contentCSSText = '',
+    cssText = '',
+    initialCSSText = '',
+    pasteAsPlainText = false,
+    pasteListener = false,
+    keyDownListener = false,
+    keyUpListener = false,
+    inputListener = false,
+    autoCapitalize = 'off',
+    enterKeyHint = '',
+    autoCorrect = false,
+    defaultParagraphSeparator = 'div',
+    // When first gaining focus, the cursor moves to the end of the text
+    firstFocusEnd = true,
+    useContainer = true,
+    onIos = true,
+  } = options;
+  //ERROR: HTML height not 100%;
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -57,7 +57,9 @@ function createHTML(options = {}) {
         * {outline: 0px solid transparent;-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-touch-callout: none;box-sizing: border-box;}
         html, body { margin: 0; padding: 0;font-family: Arial, Helvetica, sans-serif; font-size:1em; height: 100%}
         body { overflow-y: hidden; -webkit-overflow-scrolling: touch;background-color: ${backgroundColor};caret-color: ${caretColor};}
-        .content {font-family: Arial, Helvetica, sans-serif;color: ${color}; width: 100%;${!useContainer ? 'height:100%;' : ''}-webkit-overflow-scrolling: touch;padding-left: 0;padding-right: 0;}
+        .content {font-family: Arial, Helvetica, sans-serif;color: ${color}; width: 100%;${
+    !useContainer ? 'height:100%;' : ''
+  }-webkit-overflow-scrolling: touch;padding-left: 0;padding-right: 0;}
         .pell { height: 100%;} .pell-content { outline: 0; overflow-y: auto;padding: 10px;height: 100%;${contentCSSText}}
     </style>
     <style>
@@ -158,9 +160,9 @@ function createHTML(options = {}) {
         function execCheckboxList (node, html){
             // var html = createCheckbox(node ? node.innerHTML: '');
             var html = createCheckbox('');
-        
+
             var HTML = "<ol class='x-todo'><li class='li-todo'>"+ html +"</li></ol>"
-           
+
             var foNode;
 
             // if (node) {
@@ -176,7 +178,7 @@ function createHTML(options = {}) {
 
             //add contenteditable=false to avoid selecting the content when we click on the checkmark
             // li.firstChild.setAttribute("contenteditable", "false");
-            
+
 
             foNode && setTimeout(function (){
                 setCollapse(foNode);
@@ -205,9 +207,9 @@ function createHTML(options = {}) {
 
         function insertCheckbox (node){
             var li = getNodeByName(node, 'LI');
-            
+
             //removing text gray out (LI)
-            li.classList.remove("checked-li"); 
+            li.classList.remove("checked-li");
 
             li.insertBefore(document.createRange().createContextualFragment(createCheckbox(false)), li.firstChild);
             setCollapse(node);
@@ -283,12 +285,24 @@ function createHTML(options = {}) {
             var node = anchorNode;
             Actions.UPDATE_HEIGHT();
 
+            var ele = event.target;
+            console.log('NODE NAME', ele.nodeName);
+            console.log('Type NAME', ele.type);
+            if (!(ele.nodeName === 'INPUT' && ele.type === 'checkbox')){
+                // NOTE: this is necessary to keep so that we can know the cursor position and scroll accordingly
+                Actions.UPDATE_OFFSET_Y();
+            }
+
             if (_keyDown){
+                // Something's wrong here.
+                console.log('_checkboxFlag: ', _checkboxFlag);
+                console.log('checkboxNode: ', checkboxNode(node));
                 if(_checkboxFlag === 1 && checkboxNode(node)){
                     console.log('_checkboxFlag 1')
                     _checkboxFlag = 0;
                     var sib = node.previousSibling;
                     if (!sib || sib.childNodes.length > 1){
+                        // NOTE: It seems like there's an issue here now
                         insertCheckbox(node);
                     }
                 } else if(_checkboxFlag === 2){
@@ -448,6 +462,7 @@ function createHTML(options = {}) {
                 result: function() {
                     if (queryCommandState('insertOrderedList')) return;
                     var pNode;
+                    console.log('>>> Checkbox list called...');
                     if (anchorNode){
                         pNode = anchorNode.parentNode;
                         if (anchorNode === editor.content) pNode = null;
@@ -536,7 +551,7 @@ function createHTML(options = {}) {
                 if (!${useContainer}) return;
                 var node = anchorNode || window.getSelection().anchorNode;
                 var sel = window.getSelection();
-                if (node){
+                if (node) {
                     var siblingOffset = (node.nextSibling && node.nextSibling.offsetTop) || (node.previousSibling && node.previousSibling.offsetTop)
                     var offsetY = node.offsetTop || siblingOffset || node.parentNode.offsetTop;
                     if (offsetY){
@@ -547,7 +562,7 @@ function createHTML(options = {}) {
         };
 
         var init = function init(settings) {
-           
+
             var paragraphSeparator = settings[defaultParagraphSeparatorString];
             var content = settings.element.content = createElement('div');
             content.id = 'content';
@@ -559,7 +574,7 @@ function createHTML(options = {}) {
             content.autocomplete = 'off';
             content.className = "pell-content";
             content.oninput = function (_ref) {
-                
+
                 // var firstChild = _ref.target.firstChild;
                 if ((anchorNode === void 0 || anchorNode === content) && queryCommandValue(formatBlock) === ''){
                     if ( !compositionStatus ){
@@ -571,7 +586,7 @@ function createHTML(options = {}) {
                         } else {
                             paragraphStatus = 0;
                         }
-                        
+
                     }
                 } else if (content.innerHTML === '<br>'){
                      content.innerHTML = '';
@@ -632,7 +647,7 @@ function createHTML(options = {}) {
 
                 event.stopPropagation();
                 handleState();
-                
+
                 //fires a new click event to continue with the next actions
                 if (isCheckBoxInput){
                     ele.click()
@@ -660,7 +675,7 @@ function createHTML(options = {}) {
                     enterStatus = 1; // set enter true
                     var box;
                     var block = queryCommandValue(formatBlock);
-                 
+
                     if (queryCommandState('insertOrderedList') && !!(box = checkboxNode(anchorNode))){
                         var node = anchorNode && anchorNode.childNodes[1];
                         if (node && node.nodeName === 'BR'){
@@ -671,7 +686,7 @@ function createHTML(options = {}) {
                             _checkboxFlag = 1;
                             //adjust height
                             if (!(ele.nodeName === 'INPUT' && ele.type === 'checkbox')){
-                                Actions.UPDATE_OFFSET_Y();
+                                Actions.UPDATE_HEIGHT();
                             }
                         }
                     }
@@ -710,16 +725,16 @@ function createHTML(options = {}) {
                                 setCollapse(prevE)
                                 settings.onChange();
                             }
-                               
+
                         }
-               
+
                     } else if(queryCommandState('insertOrderedList')) {
                         if (nodeFirstChild.nodeName === 'BR' && parent.childNodes.length == 1){
                             parent.remove();
                             setCollapse(parent.parentNode)
                         }
                     }
-                  
+
                 }
                 ${keyDownListener} && postKeyAction(event, "CONTENT_KEYDOWN");
             }
@@ -762,7 +777,7 @@ function createHTML(options = {}) {
                 console.log('handleClick')
                 var ele = event.target;
                 const isCheckBoxInput = ele.nodeName === 'INPUT' && ele.type === 'checkbox'
-                
+
                 if (isCheckBoxInput){
                     // Set whether the checkbox is selected by default
                     if (ele.checked) ele.setAttribute('checked', '');
@@ -788,6 +803,8 @@ function createHTML(options = {}) {
                 // get text representation of clipboard
                 var text = (e.originalEvent || e).clipboardData.getData('text/plain');
 
+                console.log('PASTING');
+                console.log(text);
                 ${pasteListener} && postAction({type: 'CONTENT_PASTED', data: text});
                 if (${pasteAsPlainText}) {
                     // cancel paste
