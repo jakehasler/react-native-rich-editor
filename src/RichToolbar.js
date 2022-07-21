@@ -247,6 +247,7 @@ export default class RichToolbar extends Component {
       <TouchableOpacity
         key={action}
         disabled={disabled}
+        hitSlop={{x: 16, y: 8}}
         style={[{width: iconGap + iconSize}, styles.item, itemStyle, style]}
         onPress={() => that._onPress(action)}
       >

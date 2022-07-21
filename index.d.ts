@@ -99,6 +99,11 @@ export interface RichEditorProps extends WebViewProps {
     onInput?: ({data: string, inputType: string}) => void;
 
     /**
+     * Callback when the link clicked
+     */
+    onLink?: (url: string) => void;
+
+    /**
      * Callback when the editor focus some content
      */
     onFocus?: () => void;
@@ -180,6 +185,11 @@ export class RichEditor extends React.Component<RichEditorProps> {
     blurContentEditor: () => void;
 
     focusContentEditor: () => void;
+
+    /**
+     * Scrolls the view into the current cursor position
+     */
+    scrollSelectionIntoView: () => void;
 
     insertImage: (attributes: any, style?: string) => void;
 
